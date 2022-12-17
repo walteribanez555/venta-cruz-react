@@ -1,11 +1,15 @@
-import { getAuth } from "firebase/auth"
+import { getAuth, updateProfile } from "firebase/auth"
+import { doc, updateDoc } from "firebase/firestore";
 import { useState } from "react"
 import { useNavigate } from "react-router-dom";
+import {toast} from "react-toastify";
+import { db } from "../firebase";
 
-export default function Profie() {
+export default function Profile() {
 
   const auth = getAuth();
   const navigate = useNavigate();
+  const [changeDetail, setChangeDetail] = useState(false)
 
   const [formData, setFormData] = useState({
     name: auth.currentUser.displayName,
@@ -17,6 +21,36 @@ export default function Profie() {
     navigate("/");
 
   }
+  function onChange(e){
+
+    setFormData((prevState)=> ({
+      ...prevState,
+      [e.target.id] : e.target.value, 
+    }))
+  }
+
+  async function onSubmit(){
+    try{
+      if(auth.currentUser.displayName !== name){
+        //update display name
+        await updateProfile(auth.currentUser, {
+          displayName: name,
+        });
+
+        //update name in the firestore
+
+        const docRef = doc(db, "users", auth.currentUser.uid)
+        await updateDoc(docRef, {
+          name,
+        });
+      }
+      toast.success('Profile details updated')
+
+    }catch(error){
+      toast.error("Could not update the profile details")
+    }
+
+  }
 
 
   return (
@@ -26,7 +60,8 @@ export default function Profie() {
         <div className="w-full md:w-[50%] mt-6 px-3">
           <form >
             {/*Name input  */}
-            <input type="text" id="name" value={name} disabled className="mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border border-gray-300 rounded transition ease-in-out "  />
+            <input type="text" id="name" value={name} disabled={!changeDetail} onChange={onChange} 
+            className={`mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border border-gray-300 rounded transition ease-in-out  ${changeDetail && "bg-red-200 focus:bg-red-200"}`} />
 
 
             {/*Email input  */}
@@ -34,7 +69,13 @@ export default function Profie() {
 
             <div className="flex justify-between whitespace-nowrap text-sm sm:text-lg">
               <p className="flex items-center mb-6">Do you want to change your name? 
-                <span  className="text-red-600 hover:text-red-7'' transition ease-in-out duration-200 ml-1 cursor-pointer">Edit</span>
+                <span onClick={() =>{
+                  changeDetail && onSubmit()
+                  setChangeDetail((prevState) => !prevState )
+                }}  
+                  className="text-red-600 hover:text-red-7'' transition ease-in-out duration-200 ml-1 cursor-pointer">
+                  {changeDetail ? "Apply change" : "Edit"}
+                  </span>
               </p>
               <p  onClick={onLogout} className="text-blue-600 hover:text-blue-800 transition duration-200 ease-in-out cursor-pointer">Sign out</p>
             </div>
