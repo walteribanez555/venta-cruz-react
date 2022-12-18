@@ -54,8 +54,7 @@ export default function SignUp() {
             formDataCopy.timestamp = serverTimestamp
             ();
            
-            await setDoc(doc(db, "users", user.
-            uid ), formDataCopy);
+            await setDoc(doc(db, "users", user.uid ), formDataCopy);
             //toast.success("Sign up was successfull")
             //navigate("/");
 
