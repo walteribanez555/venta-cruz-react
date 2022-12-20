@@ -122,7 +122,7 @@ export default function Home() {
             <h2 className="px-3 text-2xl mt-6 font-semibold">
               Recent offers
             </h2>
-            <Link to="/sales">
+            <Link to="/offers">
               <p className="px-3 text-sm text-blue-600 hover:text-blue-800 transition duration-150 ease-in-out">
                 Show more offers
               </p>
